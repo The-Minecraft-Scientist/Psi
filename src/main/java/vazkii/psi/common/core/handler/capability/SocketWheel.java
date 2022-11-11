@@ -8,8 +8,9 @@
  */
 package vazkii.psi.common.core.handler.capability;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -18,7 +19,7 @@ import vazkii.psi.api.cad.ISocketable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SocketWheel implements ISocketable, INBTSerializable<CompoundNBT> {
+public class SocketWheel implements ISocketable, INBTSerializable<CompoundTag> {
 
 	private final int size;
 
@@ -34,6 +35,7 @@ public class SocketWheel implements ISocketable, INBTSerializable<CompoundNBT> {
 		this.size = size;
 		this.handler = new ItemStackHandler(size);
 	}
+
 
 	@Override
 	public boolean isSocketSlotAvailable(int slot) {
@@ -87,14 +89,14 @@ public class SocketWheel implements ISocketable, INBTSerializable<CompoundNBT> {
 	}
 
 	@Override
-	public CompoundNBT serializeNBT() {
-		CompoundNBT compound = handler.serializeNBT();
+	public CompoundTag serializeNBT() {
+		CompoundTag compound = handler.serializeNBT();
 		compound.remove("Size");
 		return compound;
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		nbt.putInt("Size", size);
 		handler.deserializeNBT(nbt);
 	}

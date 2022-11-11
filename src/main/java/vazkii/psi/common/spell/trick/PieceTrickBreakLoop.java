@@ -8,7 +8,7 @@
  */
 package vazkii.psi.common.spell.trick;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import vazkii.psi.api.PsiAPI;
 import vazkii.psi.api.cad.ISocketable;
@@ -49,11 +49,11 @@ public class PieceTrickBreakLoop extends PieceTrick {
 			if (context.focalPoint != context.caster) {
 				if (context.focalPoint instanceof EntitySpellCircle) {
 					EntitySpellCircle circle = (EntitySpellCircle) context.focalPoint;
-					CompoundNBT circleNBT = new CompoundNBT();
-					circle.writeAdditional(circleNBT);
+					CompoundTag circleNBT = new CompoundTag();
+					circle.addAdditionalSaveData(circleNBT);
 					circleNBT.putInt("timesCast", 20);
 					circleNBT.putInt("timesAlive", 100);
-					circle.read(circleNBT);
+					circle.load(circleNBT);
 				} else {
 					context.focalPoint.remove();
 				}

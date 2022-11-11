@@ -8,12 +8,13 @@
  */
 package vazkii.psi.api.cad;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import vazkii.psi.api.internal.Vector3;
 
-public interface ICADData extends INBTSerializable<CompoundNBT> {
+public interface ICADData extends INBTSerializable<CompoundTag> {
 
 	/**
 	 * Gets the total amount of the CAD has been on the player's inventory
@@ -58,5 +59,5 @@ public interface ICADData extends INBTSerializable<CompoundNBT> {
 	/**
 	 * Serializes the CAD data to be synchronized
 	 */
-	CompoundNBT serializeForSynchronization();
+	CompoundTag serializeForSynchronization();
 }

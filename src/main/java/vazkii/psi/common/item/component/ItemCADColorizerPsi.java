@@ -8,7 +8,7 @@
  */
 package vazkii.psi.common.item.component;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -17,6 +17,8 @@ import vazkii.psi.client.core.handler.ColorHandler;
 import vazkii.psi.common.core.handler.ContributorSpellCircleHandler;
 
 import java.awt.*;
+
+import net.minecraft.world.item.Item.Properties;
 
 public class ItemCADColorizerPsi extends ItemCADColorizer {
 

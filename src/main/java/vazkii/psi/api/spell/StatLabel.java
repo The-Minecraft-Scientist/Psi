@@ -8,7 +8,7 @@
  */
 package vazkii.psi.api.spell;
 
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class StatLabel {
 	private StringBuilder tooltip;
@@ -242,7 +242,7 @@ public class StatLabel {
 	}
 
 	private String translate(String str) {
-		return new TranslationTextComponent(str).getString();
+		return new TranslatableComponent(str).getString();
 	}
 
 	private String formatDouble(double value) {

@@ -9,7 +9,7 @@
 package vazkii.psi.client.jei.crafting;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import mezz.jei.api.constants.VanillaTypes;
@@ -19,12 +19,12 @@ import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICustomCraftingCategoryExtension;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
 
 import vazkii.psi.api.spell.ISpellAcceptor;
 import vazkii.psi.common.crafting.recipe.BulletToDriveRecipe;
@@ -45,8 +45,8 @@ public class BulletToDriveExtension implements ICustomCraftingCategoryExtension 
 				.filter(item -> item instanceof ItemSpellBullet)
 				.toArray(Item[]::new);
 		inputs = ImmutableList.of(
-				Ingredient.fromItems(ModItems.spellDrive),
-				Ingredient.fromItems(bullets));
+				Ingredient.of(ModItems.spellDrive),
+				Ingredient.of(bullets));
 	}
 
 	@Override
@@ -74,8 +74,8 @@ public class BulletToDriveExtension implements ICustomCraftingCategoryExtension 
 	}
 
 	@Override
-	public void drawInfo(int recipeWidth, int recipeHeight, MatrixStack matrixStack, double mouseX, double mouseY) {
-		Minecraft.getInstance().fontRenderer.drawString(matrixStack, I18n.format("jei.psi.spell_copy"), 57, 46, 0x808080);
+	public void drawInfo(int recipeWidth, int recipeHeight, PoseStack matrixStack, double mouseX, double mouseY) {
+		Minecraft.getInstance().font.draw(matrixStack, I18n.get("jei.psi.spell_copy"), 57, 46, 0x808080);
 		RenderSystem.enableAlphaTest(); // Prevents state leak affecting the shapeless icon
 	}
 

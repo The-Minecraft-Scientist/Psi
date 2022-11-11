@@ -9,27 +9,29 @@
 package vazkii.psi.client.core.proxy;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.player.LocalPlayer;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.model.ModelBakery;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DeferredWorkQueue;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.client.ForgeRenderTypes;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -67,46 +69,35 @@ import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientProxy implements IProxy {
-
-	@Override
-	public void registerHandlers() {
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::modelBake);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addCADModels);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadComplete);
-	}
-
+	@SubscribeEvent
 	private void clientSetup(FMLClientSetupEvent event) {
-
 		KeybindHandler.init();
-
-		ClientRegistry.bindTileEntityRenderer(TileProgrammer.TYPE, RenderTileProgrammer::new);
-
-		RenderingRegistry.registerEntityRenderingHandler(EntitySpellCircle.TYPE, RenderSpellCircle::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntitySpellCharge.TYPE, RenderSpellProjectile::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntitySpellGrenade.TYPE, RenderSpellProjectile::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntitySpellProjectile.TYPE, RenderSpellProjectile::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntitySpellMine.TYPE, RenderSpellProjectile::new);
-		RenderTypeLookup.setRenderLayer(ModBlocks.conjured, RenderType.getTranslucent());
+		ItemBlockRenderTypes.setRenderLayer(ModBlocks.conjured, RenderType.translucent());
 	}
-
+	@SubscribeEvent
+	public static void entityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+		event.registerBlockEntityRenderer(TileProgrammer.TYPE, RenderTileProgrammer::new);
+		event.registerEntityRenderer(EntitySpellCircle.TYPE, RenderSpellCircle::new);
+		event.registerEntityRenderer(EntitySpellCharge.TYPE, RenderSpellProjectile::new);
+		event.registerEntityRenderer(EntitySpellGrenade.TYPE, RenderSpellProjectile::new);
+		event.registerEntityRenderer(EntitySpellMine.TYPE, RenderSpellProjectile::new);
+	}
+	@SubscribeEvent
 	private void loadComplete(FMLLoadCompleteEvent event) {
-		DeferredWorkQueue.runLater(() -> {
-			Map<RenderType, BufferBuilder> map = ((AccessorRenderBuffers) Minecraft.getInstance().getRenderTypeBuffers().getBufferSource()).getFixedBuffers();
-			RenderType layer = SpellPiece.getLayer();
-			map.put(layer, new BufferBuilder(layer.getBufferSize()));
-			map.put(GuiProgrammer.LAYER, new BufferBuilder(GuiProgrammer.LAYER.getBufferSize()));
-			ColorHandler.init();
-			ShaderHandler.init();
-		});
+		Map<RenderType, BufferBuilder> map = ((AccessorRenderBuffers) Minecraft.getInstance().renderBuffers().bufferSource()).getFixedBuffers();
+		RenderType layer = SpellPiece.getLayer();
+		map.put(layer, new BufferBuilder(layer.bufferSize()));
+		map.put(GuiProgrammer.LAYER, new BufferBuilder(GuiProgrammer.LAYER.bufferSize()));
+		ColorHandler.init();
+		ShaderHandler.init();
 	}
-
+	@SubscribeEvent
 	private void modelBake(ModelBakeEvent event) {
 		ModelResourceLocation key = new ModelResourceLocation(ModItems.cad.getRegistryName(), "inventory");
 		event.getModelRegistry().put(key, new ModelCAD());
 
 	}
-
+	@SubscribeEvent
 	private void addCADModels(ModelRegistryEvent event) {
 		ModelLoader.addSpecialModel(new ResourceLocation(LibMisc.MOD_ID, "item/" + LibItemNames.CAD_IRON));
 		ModelLoader.addSpecialModel(new ResourceLocation(LibMisc.MOD_ID, "item/" + LibItemNames.CAD_GOLD));
@@ -114,35 +105,35 @@ public class ClientProxy implements IProxy {
 		ModelLoader.addSpecialModel(new ResourceLocation(LibMisc.MOD_ID, "item/" + LibItemNames.CAD_EBONY_PSIMETAL));
 		ModelLoader.addSpecialModel(new ResourceLocation(LibMisc.MOD_ID, "item/" + LibItemNames.CAD_IVORY_PSIMETAL));
 		ModelLoader.addSpecialModel(new ResourceLocation(LibMisc.MOD_ID, "item/" + LibItemNames.CAD_CREATIVE));
-		ModelBakery.LOCATIONS_BUILTIN_TEXTURES.addAll(ClientPsiAPI.getAllSpellPieceMaterial());
-		ModelBakery.LOCATIONS_BUILTIN_TEXTURES.add(new RenderMaterial(ClientPsiAPI.PSI_PIECE_TEXTURE_ATLAS, PieceConnector.LINES_TEXTURE));
+		ModelBakery.UNREFERENCED_TEXTURES.addAll(ClientPsiAPI.getAllSpellPieceMaterial());
+		ModelBakery.UNREFERENCED_TEXTURES.add(new Material(ClientPsiAPI.PSI_PIECE_TEXTURE_ATLAS, PieceConnector.LINES_TEXTURE));
 	}
 
 	@Override
-	public boolean hasAdvancement(ResourceLocation advancement, PlayerEntity playerEntity) {
-		if (playerEntity instanceof ClientPlayerEntity) {
-			ClientPlayerEntity clientPlayerEntity = (ClientPlayerEntity) playerEntity;
-			return clientPlayerEntity.connection.getAdvancementManager().getAdvancementList().getAdvancement(advancement) != null;
-		} else if (playerEntity instanceof ServerPlayerEntity) {
-			ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) playerEntity;
-			return serverPlayerEntity.getServer().getAdvancementManager().getAdvancement(advancement) != null && serverPlayerEntity.getAdvancements().getProgress(serverPlayerEntity.getServer().getAdvancementManager().getAdvancement(advancement)).isDone();
+	public boolean hasAdvancement(ResourceLocation advancement, Player playerEntity) {
+		if (playerEntity instanceof LocalPlayer) {
+			LocalPlayer clientPlayerEntity = (LocalPlayer) playerEntity;
+			return clientPlayerEntity.connection.getAdvancements().getAdvancements().get(advancement) != null;
+		} else if (playerEntity instanceof ServerPlayer) {
+			ServerPlayer serverPlayerEntity = (ServerPlayer) playerEntity;
+			return serverPlayerEntity.getServer().getAdvancements().getAdvancement(advancement) != null && serverPlayerEntity.getAdvancements().getOrStartProgress(serverPlayerEntity.getServer().getAdvancements().getAdvancement(advancement)).isDone();
 		}
 		return false;
 	}
 
 	@Override
-	public void addParticleForce(World world, IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+	public void addParticleForce(Level world, ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 		world.addParticle(particleData, true, x, y, z, xSpeed, ySpeed, zSpeed);
 	}
 
 	@Override
-	public PlayerEntity getClientPlayer() {
+	public Player getClientPlayer() {
 		return Minecraft.getInstance().player;
 	}
 
 	@Override
-	public World getClientWorld() {
-		return Minecraft.getInstance().world;
+	public Level getClientWorld() {
+		return Minecraft.getInstance().level;
 	}
 
 	@Override
@@ -152,7 +143,7 @@ public class ClientProxy implements IProxy {
 
 	@Override
 	public int getClientRenderDistance() {
-		return Minecraft.getInstance().gameSettings.renderDistanceChunks;
+		return Minecraft.getInstance().options.renderDistance;
 	}
 
 	@Override
@@ -171,7 +162,7 @@ public class ClientProxy implements IProxy {
 	}
 
 	@Override
-	public void sparkleFX(World world, double x, double y, double z, float r, float g, float b, float motionx, float motiony, float motionz, float size, int m) {
+	public void sparkleFX(Level world, double x, double y, double z, float r, float g, float b, float motionx, float motiony, float motionz, float size, int m) {
 		if (m == 0) {
 			return;
 		}
@@ -182,11 +173,11 @@ public class ClientProxy implements IProxy {
 
 	@Override
 	public void sparkleFX(double x, double y, double z, float r, float g, float b, float motionx, float motiony, float motionz, float size, int m) {
-		sparkleFX(Minecraft.getInstance().world, x, y, z, r, g, b, motionx, motiony, motionz, size, m);
+		sparkleFX(Minecraft.getInstance().level, x, y, z, r, g, b, motionx, motiony, motionz, size, m);
 	}
 
 	@Override
-	public void wispFX(World world, double x, double y, double z, float r, float g, float b, float size, float motionx, float motiony, float motionz, float maxAgeMul) {
+	public void wispFX(Level world, double x, double y, double z, float r, float g, float b, float size, float motionx, float motiony, float motionz, float maxAgeMul) {
 		if (maxAgeMul == 0) {
 			return;
 		}
@@ -196,12 +187,12 @@ public class ClientProxy implements IProxy {
 
 	@Override
 	public void wispFX(double x, double y, double z, float r, float g, float b, float size, float motionx, float motiony, float motionz, float maxAgeMul) {
-		wispFX(Minecraft.getInstance().world, x, y, z, r, g, b, size, motionx, motiony, motionz, maxAgeMul);
+		wispFX(Minecraft.getInstance().level, x, y, z, r, g, b, size, motionx, motiony, motionz, maxAgeMul);
 	}
 
 	@Override
 	public void openProgrammerGUI(TileProgrammer programmer) {
-		Minecraft.getInstance().displayGuiScreen(new GuiProgrammer(programmer));
+		Minecraft.getInstance().setScreen(new GuiProgrammer(programmer));
 	}
 
 }

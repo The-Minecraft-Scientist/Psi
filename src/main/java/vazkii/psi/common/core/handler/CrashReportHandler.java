@@ -8,15 +8,15 @@
  */
 package vazkii.psi.common.core.handler;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.fml.common.ICrashCallable;
+import net.minecraft.nbt.CompoundTag;
 
+import net.minecraftforge.fml.ISystemReportExtender;
 import vazkii.psi.api.spell.CompiledSpell;
 import vazkii.psi.api.spell.SpellPiece;
 
-public class CrashReportHandler implements ICrashCallable {
-	private static final ThreadLocal<CompiledSpell> activeSpell = new ThreadLocal<>();
-	private static final ThreadLocal<SpellPiece> activePiece = new ThreadLocal<>();
+public class CrashReportHandler implements ISystemReportExtender {
+	private static final ThreadLocal<CompiledSpell> activeSpell = new ThreadLocal<CompiledSpell>();
+	private static final ThreadLocal<SpellPiece> activePiece = new ThreadLocal<SpellPiece>();
 
 	public static void setSpell(CompiledSpell spell, SpellPiece piece) {
 		activeSpell.set(spell);
@@ -28,8 +28,9 @@ public class CrashReportHandler implements ICrashCallable {
 		return "[Psi] Active spell";
 	}
 
+
 	@Override
-	public String call() {
+	public String get() {
 		CompiledSpell spell = activeSpell.get();
 		SpellPiece piece = activePiece.get();
 		if (spell == null) {
@@ -41,7 +42,7 @@ public class CrashReportHandler implements ICrashCallable {
 			prefix = "[" + piece.x + ", " + piece.y + "] in ";
 		}
 
-		CompoundNBT result = new CompoundNBT();
+		CompoundTag result = new CompoundTag();
 		spell.sourceSpell.writeToNBT(result);
 		return prefix + result;
 	}

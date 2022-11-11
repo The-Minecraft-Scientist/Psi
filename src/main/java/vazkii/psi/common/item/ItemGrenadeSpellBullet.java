@@ -8,8 +8,8 @@
  */
 package vazkii.psi.common.item;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 
 import vazkii.psi.api.PsiAPI;
 import vazkii.psi.api.cad.EnumCADComponent;
@@ -19,6 +19,8 @@ import vazkii.psi.common.entity.EntitySpellGrenade;
 import vazkii.psi.common.entity.EntitySpellProjectile;
 
 import java.util.ArrayList;
+
+import net.minecraft.world.item.Item.Properties;
 
 public class ItemGrenadeSpellBullet extends ItemSpellBullet {
 
@@ -31,10 +33,10 @@ public class ItemGrenadeSpellBullet extends ItemSpellBullet {
 		ItemStack cad = PsiAPI.getPlayerCAD(context.caster);
 		ItemStack colorizer = ((ICAD) cad.getItem()).getComponentInSlot(cad, EnumCADComponent.DYE);
 
-		EntitySpellProjectile projectile = new EntitySpellGrenade(context.caster.getEntityWorld(), context.caster);
+		EntitySpellProjectile projectile = new EntitySpellGrenade(context.caster.getCommandSenderWorld(), context.caster);
 		projectile.setInfo(context.caster, colorizer, stack);
 		projectile.context = context;
-		projectile.getEntityWorld().addEntity(projectile);
+		projectile.getCommandSenderWorld().addFreshEntity(projectile);
 		ArrayList<Entity> spellEntities = new ArrayList<>();
 		spellEntities.add(projectile);
 		return spellEntities;

@@ -8,32 +8,32 @@
  */
 package vazkii.psi.common.block.base;
 
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.core.Direction;
 
-public class DirectionBlockItemUseContext extends BlockItemUseContext {
+public class DirectionBlockItemUseContext extends BlockPlaceContext {
 
 	private Direction horizontalFacing;
 
-	public DirectionBlockItemUseContext(ItemUseContext itemUseContext, Direction horizontalFacing) {
+	public DirectionBlockItemUseContext(UseOnContext itemUseContext, Direction horizontalFacing) {
 		super(itemUseContext);
 		this.horizontalFacing = horizontalFacing;
 	}
 
 	@Override
-	public Direction getPlacementHorizontalFacing() {
+	public Direction getHorizontalDirection() {
 		return horizontalFacing.getAxis() == Direction.Axis.Y ? Direction.NORTH : horizontalFacing;
 	}
 
 	@Override
 	public Direction getNearestLookingDirection() {
-		return rayTraceResult.getFace();
+		return hitResult.getDirection();
 	}
 
 	@Override
 	public Direction[] getNearestLookingDirections() {
-		switch (this.rayTraceResult.getFace()) {
+		switch (this.hitResult.getDirection()) {
 		case DOWN:
 		default:
 			return new Direction[] { Direction.DOWN, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP };

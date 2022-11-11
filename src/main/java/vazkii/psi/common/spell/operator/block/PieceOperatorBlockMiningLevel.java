@@ -8,8 +8,8 @@
  */
 package vazkii.psi.common.spell.operator.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
 
 import vazkii.psi.api.internal.Vector3;
 import vazkii.psi.api.spell.Spell;
@@ -36,7 +36,7 @@ public class PieceOperatorBlockMiningLevel extends PieceOperator {
 	@Override
 	public Object execute(SpellContext context) throws SpellRuntimeException {
 		BlockPos pos = SpellHelpers.getBlockPos(this, context, position, false, false);
-		BlockState state = context.caster.world.getBlockState(pos);
+		BlockState state = context.caster.level.getBlockState(pos);
 		return state.getBlock().getHarvestLevel(state) * 1.0D;
 	}
 

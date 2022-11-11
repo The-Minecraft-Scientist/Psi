@@ -8,16 +8,17 @@
  */
 package vazkii.psi.api.spell;
 
-import net.minecraft.util.Util;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.Util;
+import net.minecraft.network.chat.Style;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import vazkii.psi.api.PsiAPI;
 import vazkii.psi.api.internal.IPlayerData;
 import vazkii.psi.common.network.MessageRegister;
 import vazkii.psi.common.network.message.MessageSpellError;
 
+import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -30,9 +31,9 @@ public class CompiledSpell {
 	public final Spell sourceSpell;
 	public final SpellMetadata metadata = new SpellMetadata();
 
-	public final Stack<Action> actions = new Stack<>();
-	public final Map<SpellPiece, CatchHandler> errorHandlers = new HashMap<>();
-	public final Map<SpellPiece, Action> actionMap = new HashMap<>();
+	public final Stack<Action> actions = new Stack<Action>();
+	public final Map<SpellPiece, CatchHandler> errorHandlers = new HashMap<SpellPiece, CatchHandler>();
+	public final Map<SpellPiece, Action> actionMap = new HashMap<SpellPiece, Action>();
 
 	public Action currentAction;
 	public final boolean[][] spotsEvaluated;
@@ -77,7 +78,7 @@ public class CompiledSpell {
 	 */
 	@SuppressWarnings("unchecked")
 	public void safeExecute(SpellContext context) {
-		if (context.caster.getEntityWorld().isRemote) {
+		if (context.caster.getCommandSenderWorld().isClientSide) {
 			return;
 		}
 
@@ -91,7 +92,7 @@ public class CompiledSpell {
 			}
 		} catch (SpellRuntimeException e) {
 			if (!context.shouldSuppressErrors()) {
-				context.caster.sendMessage(new TranslationTextComponent(e.getMessage()).setStyle(Style.EMPTY.setFormatting(TextFormatting.RED)), Util.DUMMY_UUID);
+				context.caster.sendMessage(new TranslatableComponent(e.getMessage()).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)), Util.NIL_UUID);
 
 				int x = context.cspell.currentAction.piece.x + 1;
 				int y = context.cspell.currentAction.piece.y + 1;
